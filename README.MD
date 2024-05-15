@@ -5,3 +5,8 @@ This is an educational project developed following the book [Let's Go Further](h
 
 ## My twist
 I'll use SQLite as the DB instead of PostgreSQL (which is the author's choice)
+
+## Endpoints
+| URL | Action                                   |
+| --------------- | ---------------------------- |
+| /v1/healthcheck | Show application information |
