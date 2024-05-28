@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -16,4 +17,30 @@ func (app *application) readIdFromRequestParams(r *http.Request) (int64, error) 
 	}
 
 	return id, nil
+}
+
+// Write JSON to the given ResponseWriter
+func (app *application) writeJSON(
+	w http.ResponseWriter,
+	status int,
+	data any,
+	headers http.Header,
+) error {
+	js, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	// Just to make it easier to view in terminal
+	js = append(js, '\n')
+
+	for key, value := range headers {
+		w.Header()[key] = value
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(js)
+
+	return nil
 }
