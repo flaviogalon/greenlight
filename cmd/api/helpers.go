@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+type envelope map[string]any
+
 // Read an ID from a HTTP request's parameters
 func (app *application) readIdFromRequestParams(r *http.Request) (int64, error) {
 	idString := r.PathValue("id")
@@ -23,7 +25,7 @@ func (app *application) readIdFromRequestParams(r *http.Request) (int64, error) 
 func (app *application) writeJSON(
 	w http.ResponseWriter,
 	status int,
-	data any,
+	data envelope,
 	headers http.Header,
 ) error {
 	js, err := json.Marshal(data)
