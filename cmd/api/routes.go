@@ -2,12 +2,13 @@ package main
 
 import "net/http"
 
-func (app *application) routes() *http.ServeMux {
+func (app *application) routes() http.Handler {
 	router := http.NewServeMux()
 
 	router.HandleFunc("GET /v1/healthcheck", app.healthcheckHandler)
 	router.HandleFunc("POST /v1/movies", app.createMovieHandler)
 	router.HandleFunc("GET /v1/movies/{id}", app.getMovieHandler)
+	router.HandleFunc("/", app.notFoundResponse)
 
 	return router
 }
