@@ -13,3 +13,14 @@ This is an educational project developed following the book [Let's Go Further](h
 | GET    | /v1/healthcheck | Show application information         |
 | POST   | /v1/movies      | Create a new movie                   |
 | GET    | /v1/movies/:id  | show the details of a specific movie |
+
+## DB 
+- The application requires a sqlite3 DB file.
+- The application expects a `GREENLIGHT_DB_DSN` environment variable, startup will fail if none provided.
+
+## Migrations
+To run a migration:
+```shell
+migrate -path=./migrations -database <DB DSN> 
+```
+Obs: don't use query strings on DSN!
