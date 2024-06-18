@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"greenlight.flaviogalon.github.io/internal/validator"
@@ -53,9 +54,9 @@ type MovieModel struct {
 // Insert a new record in the movies table
 func (m MovieModel) Insert(movie *Movie) error {
 	query := `
-    INSERT INTO movies (title, year, runtime, genres)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id, created_at, version`
+        INSERT INTO movies (title, year, runtime, genres)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, created_at, version`
 
 	jsonGenres, err := json.Marshal(movie.Genres)
 	if err != nil {
@@ -69,7 +70,44 @@ func (m MovieModel) Insert(movie *Movie) error {
 
 // Fetch a specific record from the movies table
 func (m MovieModel) Get(id int64) (*Movie, error) {
-	return nil, nil
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	query := `
+        SELECT id, created_at, title, year, runtime, genres, version
+        FROM movies
+        WHERE id = $1`
+
+	var movie Movie
+	var genresJSONString string
+
+	err := m.DB.QueryRow(query, id).Scan(
+		&movie.ID,
+		&movie.CreatedAt,
+		&movie.Title,
+		&movie.Year,
+		&movie.Runtime,
+		&genresJSONString,
+		&movie.Version,
+	)
+	// DB query erros
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	// JSON parsing error
+	err = json.Unmarshal([]byte(genresJSONString), &movie.Genres)
+	if err != nil {
+		return nil, err
+	}
+
+	return &movie, nil
 }
 
 // Update a specific record in the movies table
