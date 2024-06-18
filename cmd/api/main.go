@@ -12,6 +12,8 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+
+	"greenlight.flaviogalon.github.io/internal/data"
 )
 
 // Temporarily having this hardcoded
@@ -31,6 +33,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	models data.Models
 }
 
 func main() {
@@ -61,6 +64,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	srv := &http.Server{
