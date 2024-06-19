@@ -8,11 +8,12 @@ This is an educational project developed following the book [Let's Go Further](h
 - I'll use Go's router (ServeMux) taking advantages of the improvements made on v1.22
 
 ## Endpoints
-| Method | URL             | Action                               |
-| ------ | --------------- | ------------------------------------ |
-| GET    | /v1/healthcheck | Show application information         |
-| POST   | /v1/movies      | Create a new movie                   |
-| GET    | /v1/movies/:id  | show the details of a specific movie |
+| Method | URL             | Action                                 |
+| ------ | --------------- | -------------------------------------- |
+| GET    | /v1/healthcheck | Show application information           |
+| POST   | /v1/movies      | Create a new movie                     |
+| GET    | /v1/movies/:id  | show the details of a specific movie   |
+| PUT    | /v1/movies/:id  | Update the details of a specific movie |
 
 ## DB 
 - The application requires a sqlite3 DB file.

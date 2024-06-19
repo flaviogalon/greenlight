@@ -112,7 +112,26 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 
 // Update a specific record in the movies table
 func (m MovieModel) Update(movie *Movie) error {
-	return nil
+	query := `
+        UPDATE movies
+        SET title = $1, year = $2, runtime = $3, genres = $4, version = version + 1
+        WHERE id = $5
+        RETURNING version`
+
+	jsonGenres, err := json.Marshal(movie.Genres)
+	if err != nil {
+		return err
+	}
+
+	args := []any{
+		movie.Title,
+		movie.Year,
+		movie.Runtime,
+		jsonGenres,
+		movie.ID,
+	}
+
+	return m.DB.QueryRow(query, args...).Scan(&movie.Version)
 }
 
 // Delete a specific record from the movies table
