@@ -97,12 +97,12 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Data that's expected from the client
+	// Data that's expected from the client, pointers and slices have a 'nil' zero-value
 	var inputData struct {
-		Title   string       `json:"title"`
-		Year    int32        `json:"year"`
-		Runtime data.Runtime `json:"runtime"`
-		Genres  []string     `json:"genres"`
+		Title   *string       `json:"title"`
+		Year    *int32        `json:"year"`
+		Runtime *data.Runtime `json:"runtime"`
+		Genres  []string      `json:"genres"`
 	}
 
 	err = app.readJSON(w, r, &inputData)
@@ -111,11 +111,19 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Copy the values from inputData to the movie record retrieved from DB
-	movie.Title = inputData.Title
-	movie.Year = inputData.Year
-	movie.Runtime = inputData.Runtime
-	movie.Genres = inputData.Genres
+	// Check if fields were provided on request body
+	if inputData.Title != nil {
+		movie.Title = *inputData.Title
+	}
+	if inputData.Year != nil {
+		movie.Year = *inputData.Year
+	}
+	if inputData.Runtime != nil {
+		movie.Runtime = *inputData.Runtime
+	}
+	if inputData.Genres != nil {
+		movie.Genres = inputData.Genres
+	}
 
 	// Validate the resulting data
 	v := validator.New()

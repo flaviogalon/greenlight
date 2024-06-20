@@ -13,7 +13,7 @@ This is an educational project developed following the book [Let's Go Further](h
 | GET    | /v1/healthcheck | Show application information           |
 | POST   | /v1/movies      | Create a new movie                     |
 | GET    | /v1/movies/:id  | show the details of a specific movie   |
-| PUT    | /v1/movies/:id  | Update the details of a specific movie |
+| PATCH  | /v1/movies/:id  | Update the details of a specific movie |
 | DELETE | /v1/movies/:id  | Delete a specific movie                |
 
 ## DB 
