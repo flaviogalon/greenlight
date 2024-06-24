@@ -19,6 +19,8 @@ This is an educational project developed following the book [Let's Go Further](h
 ## DB 
 - The application requires a sqlite3 DB file.
 - The application expects a `GREENLIGHT_DB_DSN` environment variable, startup will fail if none provided.
+- The number of connections of the DB pool must be `1` to minimize the chances of DB locks
+  - This is a limitation of goroutines + sqlite3, as sqlite3 doesn't support multiple concurrent writers
 
 ## Migrations
 To run a migration:

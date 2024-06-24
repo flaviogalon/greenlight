@@ -42,8 +42,8 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "SQLite DSN")
-	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "SQLite max open connections")
-	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "SQLite max idle connections")
+	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 1, "SQLite max open connections")
+	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 1, "SQLite max idle connections")
 	flag.StringVar(
 		&cfg.db.maxIdleTime,
 		"db-max-idle-time",
@@ -91,7 +91,6 @@ func openDB(cfg config) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// TODO: test if SQLite's driver handles connection pools with more than 1 connection
 	// Set the max number of open connections in the pool
 	db.SetMaxOpenConns(cfg.db.maxOpenConns)
 	// Set the max number of idle connections in the pool
