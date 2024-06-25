@@ -50,6 +50,7 @@ func ValidateMovie(v *validator.Validator, movie *Movie) {
 
 type MovieModel struct {
 	DB *sql.DB
+	ModelsConfig
 }
 
 // Insert a new record in the movies table
@@ -66,7 +67,7 @@ func (m MovieModel) Insert(movie *Movie) error {
 
 	args := []any{movie.Title, movie.Year, movie.Runtime, jsonGenres}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), m.ModelsConfig.DBQueryTimeout)
 	defer cancel()
 
 	return m.DB.QueryRowContext(ctx, query, args...).
@@ -82,7 +83,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 	var movie Movie
 	var genresJSONString string
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), m.ModelsConfig.DBQueryTimeout)
 	defer cancel()
 
 	query := `
@@ -140,7 +141,7 @@ func (m MovieModel) Update(movie *Movie) error {
 		movie.Version,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), m.ModelsConfig.DBQueryTimeout)
 	defer cancel()
 
 	err = m.DB.QueryRowContext(ctx, query, args...).Scan(&movie.Version)
@@ -166,7 +167,7 @@ func (m MovieModel) Delete(id int64) error {
         DELETE FROM movies
         WHERE id = $1`
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), m.ModelsConfig.DBQueryTimeout)
 	defer cancel()
 
 	result, err := m.DB.ExecContext(ctx, query, id)
@@ -184,4 +185,54 @@ func (m MovieModel) Delete(id int64) error {
 	}
 
 	return nil
+}
+
+func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+	query := `
+        SELECT id, created_at, title, year, runtime, genres, version
+        FROM movies
+        ORDER BY id`
+
+	ctx, cancel := context.WithTimeout(context.Background(), m.ModelsConfig.DBQueryTimeout)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	movies := []*Movie{}
+	var genresJSONString string
+
+	for rows.Next() {
+		var movie Movie
+
+		err := rows.Scan(
+			&movie.ID,
+			&movie.CreatedAt,
+			&movie.Title,
+			&movie.Year,
+			&movie.Runtime,
+			&genresJSONString,
+			&movie.Version,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal([]byte(genresJSONString), &movie.Genres)
+		if err != nil {
+			return nil, err
+		}
+
+		movies = append(movies, &movie)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return movies, nil
 }

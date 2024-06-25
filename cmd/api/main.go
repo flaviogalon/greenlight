@@ -23,10 +23,11 @@ type config struct {
 	port int
 	env  string
 	db   struct {
-		dsn          string
-		maxOpenConns int
-		maxIdleConns int
-		maxIdleTime  string
+		dsn            string
+		maxOpenConns   int
+		maxIdleConns   int
+		maxIdleTime    string
+		DBQueryTimeout time.Duration
 	}
 }
 
@@ -50,6 +51,12 @@ func main() {
 		"15m",
 		"SQLite max connection idle time",
 	)
+	flag.DurationVar(
+		&cfg.db.DBQueryTimeout,
+		"db-query-timeout",
+		3*time.Second,
+		"DB query timeout in seconds",
+	)
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
@@ -64,7 +71,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
-		models: data.NewModels(db),
+		models: data.NewModels(db, cfg.db.DBQueryTimeout),
 	}
 
 	srv := &http.Server{
