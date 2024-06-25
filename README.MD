@@ -11,6 +11,7 @@ This is an educational project developed following the book [Let's Go Further](h
 | Method | URL             | Action                                 |
 | ------ | --------------- | -------------------------------------- |
 | GET    | /v1/healthcheck | Show application information           |
+| GET    | /v1/movies      | Show the details of all movies         |
 | POST   | /v1/movies      | Create a new movie                     |
 | GET    | /v1/movies/:id  | show the details of a specific movie   |
 | PATCH  | /v1/movies/:id  | Update the details of a specific movie |

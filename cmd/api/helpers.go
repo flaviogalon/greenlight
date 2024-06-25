@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
+
+	"greenlight.flaviogalon.github.io/internal/validator"
 )
 
 type envelope map[string]any
@@ -115,4 +118,56 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 	}
 
 	return nil
+}
+
+// Returns a string value from the query string, or the provided default value if no matching key could be found
+func (app *application) readString(
+	queryStringValues url.Values,
+	key string,
+	defaultValue string,
+) string {
+	s := queryStringValues.Get(key)
+	if s == "" {
+		return defaultValue
+	}
+
+	return s
+}
+
+// Reads a string value from the query string and splits it into a slice on the comma.
+// If no matching key could be found, returns the default value.
+func (app *application) readCSV(
+	queryStringValues url.Values,
+	key string,
+	defaultValue []string,
+) []string {
+	csv := queryStringValues.Get(key)
+	if csv == "" {
+		return defaultValue
+	}
+
+	return strings.Split(csv, ",")
+}
+
+// Reads a string value from the query string and converts it to an integer.
+// If not matching key could be found returns the default value. If the conversion
+// failed due to an error, the error will be added to the provided validator instance
+func (app *application) readInt(
+	queryStringValues url.Values,
+	key string,
+	defaultValue int,
+	v *validator.Validator,
+) int {
+	s := queryStringValues.Get(key)
+	if s == "" {
+		return defaultValue
+	}
+
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+
+	return i
 }

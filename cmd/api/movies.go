@@ -9,6 +9,17 @@ import (
 	"greenlight.flaviogalon.github.io/internal/validator"
 )
 
+var LIST_MOVIES_SUPPORTED_SORT []string = []string{
+	"id",
+	"title",
+	"year",
+	"runtime",
+	"-id",
+	"-title",
+	"-year",
+	"-runtime",
+}
+
 // Create a new Movie
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
@@ -173,4 +184,31 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+// List movies with filters
+func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Title  string
+		Genres []string
+		data.Filters
+	}
+
+	v := validator.New()
+
+	queryStringValues := r.URL.Query()
+
+	input.Title = app.readString(queryStringValues, "title", "")
+	input.Genres = app.readCSV(queryStringValues, "genres", []string{})
+	input.Filters.Page = app.readInt(queryStringValues, "page", 1, v)
+	input.Filters.PageSize = app.readInt(queryStringValues, "page_size", 20, v)
+	input.Filters.Sort = app.readString(queryStringValues, "sort", "id")
+	input.SortSafeList = LIST_MOVIES_SUPPORTED_SORT
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
